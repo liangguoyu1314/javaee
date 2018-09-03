@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       					   http://www.springframework.org/schema/beans/spring-beans.xsd
+       					   http://www.springframework.org/schema/tx 
+       					   http://www.springframework.org/schema/tx/spring-tx.xsd
+        				   http://www.springframework.org/schema/aop 
+        				   http://www.springframework.org/schema/aop/spring-aop.xsd
+        				   http://www.springframework.org/schema/context 
+        				   http://www.springframework.org/schema/context/spring-context.xsd">
+        				   
+	<!--  2.在applicationContext.xml配置文件开启注解扫描	 -->
+	<context:component-scan base-package="cn.itcast"></context:component-scan>
+	
+	<!-- 3.在applicationContext.xml配置文件正确的配置HibernateTemplate -->
+	<!-- 创建SessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 1、数据源 -->
+		<property name="dataSource" ref="ds"></property>
+		<!-- 2、基本配置 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- 是否显示sql语句-->
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- 是否格式化sql语句-->
+				<prop key="hibernate.format_sql">true</prop>
+				<!-- 采用何种方式生成数据库表结构 -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+			</props>
+		</property>
+		<!-- 3、扫描持久化类的包 -->
+		<property name="packagesToScan">
+			<array>
+				<value>cn.itcast.entity</value>
+			</array>
+		</property>
+	</bean>
+	
+	<!-- 创建数据源 -->
+	<bean id="ds" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/ssh_demo1"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+	
+	
+	<!-- Hibernate的模板 -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- 声明式事务 -->
+	<!-- 1、平台事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 2、开启注解事务的支持 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+</beans>
